@@ -31,8 +31,6 @@ namespace BudgetTest
 
             Console.Write("Money for gas: "); decimal gas = decimal.Parse(Console.ReadLine());
 
-            Console.Write("Money for dad: "); decimal dad = decimal.Parse(Console.ReadLine());
-
             Console.Write("Money for hobby: "); decimal hobby = decimal.Parse(Console.ReadLine());
 
             Console.Write("Money for car: "); decimal car = decimal.Parse(Console.ReadLine());
@@ -87,7 +85,7 @@ namespace BudgetTest
 
             Console.WriteLine($"Money for games:{Percent(games):f2}% ");
 
-            Console.WriteLine($"Money for home:{Percent(TV + homeStuf + dad + cat + electricity):f2}% ");
+            Console.WriteLine($"Money for home:{Percent(TV + homeStuf + cat + electricity):f2}% ");
 
             Console.WriteLine($"Money for food:{Percent(food):f2}% ");
 

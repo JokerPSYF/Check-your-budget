@@ -8,7 +8,7 @@ public sealed class MainViewModel : ObservableObject
     // The items a first run starts with. After that, the user's own list is loaded from disk.
     private static readonly SavedBudget Defaults = new(
         Salary: "",
-        Needs: Items("Internet and TV", "Home stuff", "Dad", "Cat", "Electricity and water",
+        Needs: Items("Internet and TV", "Home stuff", "Cat", "Electricity and water",
                      "Gas", "Car", "Food", "Clothes", "Haircut", "Health"),
         Wants: Items("Going out", "Cinema", "Hobby", "Games"),
         Investment: Items("Your future"));
