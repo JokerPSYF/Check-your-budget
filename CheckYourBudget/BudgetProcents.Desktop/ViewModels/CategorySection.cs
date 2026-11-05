@@ -5,7 +5,7 @@ using BudgetProcents.Core;
 
 namespace BudgetProcents.Desktop.ViewModels;
 
-/// <summary>One input section (Needs, Wants or Investment) with its own list of items.</summary>
+/// <summary>One input section (Needs, Wants, Investment or Savings) with its own list of items.</summary>
 public sealed class CategorySection
 {
     private readonly Action changed;

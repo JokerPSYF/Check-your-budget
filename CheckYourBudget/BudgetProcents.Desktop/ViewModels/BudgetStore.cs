@@ -3,8 +3,15 @@ using System.Text.Json;
 
 namespace BudgetProcents.Desktop.ViewModels;
 
-/// <summary>What is kept between runs: the salary and each section's items, as typed.</summary>
-public sealed record SavedBudget(string? Salary, List<SavedItem>? Needs, List<SavedItem>? Wants, List<SavedItem>? Investment);
+/// <summary>What is kept between runs: the salary and each section's items, as typed, and the chosen rule.</summary>
+/// <remarks>A list is null when the file has none, for example a file saved before that section existed.</remarks>
+public sealed record SavedBudget(
+    string? Salary,
+    List<SavedItem>? Needs,
+    List<SavedItem>? Wants,
+    List<SavedItem>? Investment,
+    List<SavedItem>? Savings,
+    string? Rule);
 
 public sealed record SavedItem(string? Name, string? Amount);
 

@@ -119,7 +119,7 @@
             </DockPanel>
         </DataTemplate>
 
-        <!-- One line of the 50/40/10 rule. -->
+        <!-- One target of the chosen rule. -->
         <DataTemplate DataType="{x:Type vm:RuleRow}">
             <StackPanel Margin="0,0,0,12">
                 <DockPanel>
@@ -226,8 +226,13 @@
                         </StackPanel>
                     </Grid>
 
-                    <TextBlock Style="{StaticResource Section}" Text="Rule 50/40/10" />
-                    <ItemsControl ItemsSource="{Binding Rules}" Focusable="False" />
+                    <DockPanel Margin="0,18,0,10">
+                        <ComboBox DockPanel.Dock="Right" MinWidth="150"
+                                  ItemsSource="{Binding RuleOptions}" SelectedItem="{Binding Rule}" DisplayMemberPath="Name"
+                                  AutomationProperties.Name="Budget rule" />
+                        <TextBlock Style="{StaticResource Section}" Margin="0" VerticalAlignment="Center" Text="Rule" />
+                    </DockPanel>
+                    <ItemsControl ItemsSource="{Binding Targets}" Focusable="False" />
 
                     <TextBlock Style="{StaticResource Section}" Text="By item" />
                     <ItemsControl ItemsSource="{Binding Breakdown}" Focusable="False" />

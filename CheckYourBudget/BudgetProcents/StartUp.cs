@@ -68,17 +68,18 @@ namespace BudgetTest
                 new("Games", Category.Wants, games),
                 new("Your future", Category.Investment, future),
                 new("Your health", Category.Needs, health),
-            ]);
+            ], BudgetRule.FiftyFortyTen);
             decimal Percent(decimal amount) => BudgetCalculator.ShareOf(salary, amount).Percent;
+            decimal Goal(Category category) => result.TargetFor(category).Goal.Amount;
             const string currency = BudgetCalculator.Currency;
 
             //OUTPUT
             Console.WriteLine();
 
-            Console.WriteLine($"Rule : 50/40/10 \n50% ({result.NeedsTarget.Amount:f2} {currency}) for needs (food, house, transport, debt) \n" +
-                $"40% ({result.InvestmentTarget.Amount:f2} {currency})for investment (emergency fund, self-education," +
+            Console.WriteLine($"Rule : 50/40/10 \n50% ({Goal(Category.Needs):f2} {currency}) for needs (food, house, transport, debt) \n" +
+                $"40% ({Goal(Category.Investment):f2} {currency})for investment (emergency fund, self-education," +
                 $" stocks/ETFs, rental, properties\n" +
-                $"10% ({result.WantsTarget.Amount:f2} {currency}) for wants " +
+                $"10% ({Goal(Category.Wants):f2} {currency}) for wants " +
                 $"(restaurants, entertainment, vacations, luxuary items, electronics)");
 
             Console.WriteLine($"Money for car:{Percent(gas + car):f2}% ");

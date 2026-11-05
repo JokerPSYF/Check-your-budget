@@ -4,20 +4,28 @@ namespace BudgetProcents.Desktop.ViewModels;
 
 public enum RuleStatus { Ok, Over, Under }
 
-/// <summary>One line of the 50/40/10 rule: actual spending vs. the target.</summary>
+/// <summary>One target of the chosen rule: actual spending vs. the target.</summary>
 /// <remarks>
 /// A class, not a record: when a recalculated row equals the previous one, WPF reuses the old row's
 /// accessibility entry, which no longer points at anything on screen, so screen readers skip that row.
 /// </remarks>
-public sealed class RuleRow(string name, Share actual, decimal targetPercent, string description, RuleStatus status)
+public sealed class RuleRow(TargetCheck check)
 {
-    public string Name { get; } = name;
-    public string Description { get; } = description;
-    public RuleStatus Status { get; } = status;
-    public string AmountText { get; } = Format.Money(actual.Amount);
-    public string PercentText { get; } = Format.Percent(actual.Percent);
-    public double Percent { get; } = (double)actual.Percent;
-    public double Maximum { get; } = (double)targetPercent;
+    public string Name { get; } = check.Target.Name;
+
+    public string Description { get; } =
+        $"{(check.Target.Kind == TargetKind.AtMost ? "Up to" : "At least")} {check.Target.Percent}% " +
+        $"({Format.Money(check.Goal.Amount)}): {check.Target.Examples}";
+
+    public RuleStatus Status { get; } =
+        check.IsMet ? RuleStatus.Ok
+        : check.Target.Kind == TargetKind.AtMost ? RuleStatus.Over
+        : RuleStatus.Under;
+
+    public string AmountText { get; } = Format.Money(check.Actual.Amount);
+    public string PercentText { get; } = Format.Percent(check.Actual.Percent);
+    public double Percent { get; } = (double)check.Actual.Percent;
+    public double Maximum { get; } = (double)check.Target.Percent;
 }
 
 /// <summary>One section of the "By item" list, for example all the Needs items.</summary>

@@ -7,36 +7,30 @@ public static class BudgetCalculator
 {
     public const string Currency = "€";
 
-    // Rule 50/40/10: needs / investment / wants, as a percentage of the salary.
-    public const decimal NeedsTargetPercent = 50m;
-    public const decimal InvestmentTargetPercent = 40m;
-    public const decimal WantsTargetPercent = 10m;
-
-    /// <summary>Adds up the expenses per category and compares each total to the 50/40/10 rule.</summary>
-    public static BudgetSummary Summarize(decimal salary, IEnumerable<Expense> expenses)
+    /// <summary>Adds up the expenses per category and compares the totals to the rule's targets.</summary>
+    public static BudgetSummary Summarize(decimal salary, IEnumerable<Expense> expenses, BudgetRule rule)
     {
         List<Expense> all = [.. expenses];
         decimal Total(Category category) => all.Where(e => e.Category == category).Sum(e => e.Amount);
 
-        decimal needs = Total(Category.Needs);
-        decimal investment = Total(Category.Investment);
-        decimal wants = Total(Category.Wants);
-        decimal spent = needs + investment + wants;
-
-        Share Target(decimal percent) => new(salary * percent / 100, percent);
+        decimal spent = all.Sum(e => e.Amount);
 
         return new BudgetSummary
         {
             TotalSpent = spent,
             Residue = salary - spent,
 
-            Needs = ShareOf(salary, needs),
-            Investment = ShareOf(salary, investment),
-            Wants = ShareOf(salary, wants),
+            Needs = ShareOf(salary, Total(Category.Needs)),
+            Investment = ShareOf(salary, Total(Category.Investment)),
+            Savings = ShareOf(salary, Total(Category.Savings)),
+            Wants = ShareOf(salary, Total(Category.Wants)),
 
-            NeedsTarget = Target(NeedsTargetPercent),
-            InvestmentTarget = Target(InvestmentTargetPercent),
-            WantsTarget = Target(WantsTargetPercent),
+            Targets =
+            [
+                .. rule.Targets.Select(t => new TargetCheck(t,
+                    Actual: ShareOf(salary, t.Categories.Sum(c => Total(c))),
+                    Goal: new Share(salary * t.Percent / 100, t.Percent))),
+            ],
         };
     }
 
