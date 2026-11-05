@@ -1,0 +1,168 @@
+<Window x:Class="BudgetProcents.Desktop.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:BudgetProcents.Desktop.ViewModels"
+        xmlns:core="clr-namespace:BudgetProcents.Core;assembly=BudgetProcents.Core"
+        Title="Check your budget"
+        Width="1040" Height="800" MinWidth="760" MinHeight="480"
+        WindowStartupLocation="CenterScreen">
+
+    <Window.DataContext>
+        <vm:MainViewModel />
+    </Window.DataContext>
+
+    <Window.Resources>
+        <Style x:Key="Title" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="24" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+        <Style x:Key="Section" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="15" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Margin" Value="0,18,0,6" />
+        </Style>
+        <Style x:Key="Muted" TargetType="TextBlock">
+            <Setter Property="Opacity" Value="0.65" />
+        </Style>
+        <Style x:Key="Small" TargetType="TextBlock" BasedOn="{StaticResource Muted}">
+            <Setter Property="FontSize" Value="12" />
+        </Style>
+        <Style x:Key="Big" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="22" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+
+        <SolidColorBrush x:Key="DangerBrush" Color="#D13438" />
+        <SolidColorBrush x:Key="WarningBrush" Color="#C77C02" />
+
+        <!-- One input row: label on the left, amount box with the currency on the right. -->
+        <DataTemplate DataType="{x:Type vm:AmountField}">
+            <DockPanel Margin="0,2">
+                <TextBlock DockPanel.Dock="Right" Width="18" Margin="8,0,0,0" Opacity="0.6" VerticalAlignment="Center"
+                           Text="{x:Static core:BudgetCalculator.Currency}" />
+                <TextBox x:Name="Box" DockPanel.Dock="Right" Width="160"
+                         Text="{Binding Text, UpdateSourceTrigger=PropertyChanged}"
+                         TextAlignment="Right" VerticalContentAlignment="Center" />
+                <TextBlock x:Name="Label" Text="{Binding Label}" VerticalAlignment="Center" />
+            </DockPanel>
+            <DataTemplate.Triggers>
+                <!-- Invalid input: red text and label (the theme hides border colors while typing). -->
+                <DataTrigger Binding="{Binding HasError}" Value="True">
+                    <Setter TargetName="Box" Property="Foreground" Value="{StaticResource DangerBrush}" />
+                    <Setter TargetName="Box" Property="ToolTip" Value="Enter a positive number, for example 12,50" />
+                    <Setter TargetName="Label" Property="Foreground" Value="{StaticResource DangerBrush}" />
+                </DataTrigger>
+            </DataTemplate.Triggers>
+        </DataTemplate>
+
+        <!-- One line of the 50/40/10 rule. -->
+        <DataTemplate DataType="{x:Type vm:RuleRow}">
+            <StackPanel Margin="0,0,0,12">
+                <DockPanel>
+                    <TextBlock DockPanel.Dock="Right" FontWeight="SemiBold" Text="{Binding PercentText}" />
+                    <TextBlock>
+                        <Run Text="{Binding Name, Mode=OneWay}" FontWeight="SemiBold" />
+                        <Run Text="·" />
+                        <Run Text="{Binding AmountText, Mode=OneWay}" />
+                    </TextBlock>
+                </DockPanel>
+                <ProgressBar x:Name="Bar" Height="8" Margin="0,6,0,4" Minimum="0"
+                             Maximum="{Binding Maximum, Mode=OneWay}" Value="{Binding Percent, Mode=OneWay}" />
+                <TextBlock Style="{StaticResource Small}" Text="{Binding Description}" TextWrapping="Wrap" />
+            </StackPanel>
+            <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding Status}" Value="{x:Static vm:RuleStatus.Over}">
+                    <Setter TargetName="Bar" Property="Foreground" Value="{StaticResource DangerBrush}" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Status}" Value="{x:Static vm:RuleStatus.Under}">
+                    <Setter TargetName="Bar" Property="Foreground" Value="{StaticResource WarningBrush}" />
+                </DataTrigger>
+            </DataTemplate.Triggers>
+        </DataTemplate>
+
+        <!-- One spending group: name (and what it includes), amount, percent. -->
+        <DataTemplate DataType="{x:Type vm:GroupRow}">
+            <DockPanel Margin="0,4">
+                <TextBlock DockPanel.Dock="Right" Width="76" TextAlignment="Right" FontWeight="SemiBold" Text="{Binding PercentText}" />
+                <TextBlock DockPanel.Dock="Right" Width="120" TextAlignment="Right" Text="{Binding AmountText}" />
+                <StackPanel>
+                    <TextBlock Text="{Binding Name}" />
+                    <TextBlock x:Name="Details" Style="{StaticResource Small}" Text="{Binding Details}" TextWrapping="Wrap" />
+                </StackPanel>
+            </DockPanel>
+            <DataTemplate.Triggers>
+                <DataTrigger Binding="{Binding Details}" Value="{x:Null}">
+                    <Setter TargetName="Details" Property="Visibility" Value="Collapsed" />
+                </DataTrigger>
+            </DataTemplate.Triggers>
+        </DataTemplate>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+
+        <!-- INPUT -->
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="28,24">
+                <TextBlock Style="{StaticResource Title}" Text="Check your budget" />
+                <TextBlock Style="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,4,0,14"
+                           Text="Enter this month's salary and what you spent. The results update as you type." />
+
+                <ContentControl Content="{Binding Salary}" FontWeight="SemiBold" Focusable="False" />
+
+                <TextBlock Style="{StaticResource Section}" Text="Needs" />
+                <ItemsControl ItemsSource="{Binding NeedsFields}" Focusable="False" />
+
+                <TextBlock Style="{StaticResource Section}" Text="Wants" />
+                <ItemsControl ItemsSource="{Binding WantsFields}" Focusable="False" />
+
+                <TextBlock Style="{StaticResource Section}" Text="Investment" />
+                <ItemsControl ItemsSource="{Binding InvestmentFields}" Focusable="False" />
+
+                <Button Content="Clear all" Command="{Binding ClearCommand}"
+                        HorizontalAlignment="Left" Margin="0,20,0,0" Padding="14,6" />
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- RESULTS -->
+        <Border Grid.Column="1" Background="#0D808080" BorderBrush="#33808080" BorderThickness="1,0,0,0">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel Margin="28,24">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource Muted}" Text="Spent" />
+                            <TextBlock Style="{StaticResource Big}" Text="{Binding SpentText}" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Style="{StaticResource Muted}" Text="Left over" />
+                            <TextBlock Text="{Binding LeftOverText}">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock" BasedOn="{StaticResource Big}">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsOverspent}" Value="True">
+                                                <Setter Property="Foreground" Value="{StaticResource DangerBrush}" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </StackPanel>
+                    </Grid>
+
+                    <TextBlock Style="{StaticResource Section}" Text="Rule 50/40/10" />
+                    <ItemsControl ItemsSource="{Binding Rules}" Focusable="False" />
+
+                    <TextBlock Style="{StaticResource Section}" Text="By group" />
+                    <ItemsControl ItemsSource="{Binding Groups}" Focusable="False" />
+                </StackPanel>
+            </ScrollViewer>
+        </Border>
+    </Grid>
+</Window>

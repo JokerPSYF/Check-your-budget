@@ -1,5 +1,6 @@
 using System;
 using System.Text;
+using BudgetProcents.Core;
 
 namespace BudgetTest
 {
@@ -52,65 +53,60 @@ namespace BudgetTest
 
 
             //LOGIC
-            decimal forCar = gas + car;
-            decimal forGames = games;
-            decimal forHome = TV + homeStuf + dad + cat + electricity;
-            decimal forFood = food;
-            decimal forClothes = clothes + cutHair;
-            decimal forFun = goOut + cinema;
-            decimal forHobby = hobby;
-            decimal forFuture = future;
-            decimal sum = forCar + forGames + forHome + forFood + forClothes + forFun + forHobby + forFuture + health;
-
-            decimal forNeeds = forCar + forHome + forFood + forClothes + health;
-            decimal forInvestment = forFuture;
-            decimal forWant = forGames + forFun + forHobby;
-
-            decimal percentConverterForCar = GiveMeProcent(salary, forCar);
-            decimal percentConverterForGames = GiveMeProcent(salary, forGames); ;
-            decimal percentConverterForHome = GiveMeProcent(salary, forHome);
-            decimal percentConverterForFood = GiveMeProcent(salary, forFood);
-            decimal percentConverterForClothes = GiveMeProcent(salary, forClothes);
-            decimal percentConverterForFun = GiveMeProcent(salary, forFun);
-            decimal percentConverterForHobby = GiveMeProcent(salary, forHobby);
-            decimal percentConverterForFuture = GiveMeProcent(salary, forFuture);
-            decimal percentConverterForNeeds = GiveMeProcent(salary, forNeeds);
-            decimal percentConverterForInvestment = GiveMeProcent(salary, forInvestment);
-            decimal percentConverterForWant = GiveMeProcent(salary, forWant);
-            decimal residue = salary - sum;
+            BudgetResult result = BudgetCalculator.Calculate(new BudgetInput
+            {
+                Salary = salary,
+                InternetAndTv = TV,
+                Food = food,
+                GoingOut = goOut,
+                HomeStuff = homeStuf,
+                Clothes = clothes,
+                Gas = gas,
+                Dad = dad,
+                Hobby = hobby,
+                Car = car,
+                Cat = cat,
+                ElectricityAndWater = electricity,
+                Cinema = cinema,
+                Haircut = cutHair,
+                Games = games,
+                Future = future,
+                Health = health,
+            });
+            const string currency = BudgetCalculator.Currency;
 
             //OUTPUT
             Console.WriteLine();
 
-            Console.WriteLine($"Rule : 50/40/10 \n50% ({(salary/2):f2} лв.) for needs (food, house, transport, debt) \n" +
-                $"40% ({(salary*(decimal) 0.40):f2} лв.)for investment (emergency fund, self-education," +
+            Console.WriteLine($"Rule : 50/40/10 \n50% ({result.NeedsTarget.Amount:f2} {currency}) for needs (food, house, transport, debt) \n" +
+                $"40% ({result.InvestmentTarget.Amount:f2} {currency})for investment (emergency fund, self-education," +
                 $" stocks/ETFs, rental, properties\n" +
-                $"10% ({(salary*(decimal) 0.10f):f2} лв.) for wants " +
+                $"10% ({result.WantsTarget.Amount:f2} {currency}) for wants " +
                 $"(restaurants, entertainment, vacations, luxuary items, electronics)");
 
-            Console.WriteLine($"Money for car:{percentConverterForCar:f2}% ");
+            Console.WriteLine($"Money for car:{result.Car.Percent:f2}% ");
 
-            Console.WriteLine($"Money for games:{percentConverterForGames:f2}% ");
+            Console.WriteLine($"Money for games:{result.Games.Percent:f2}% ");
 
-            Console.WriteLine($"Money for home:{percentConverterForHome:f2}% ");
+            Console.WriteLine($"Money for home:{result.Home.Percent:f2}% ");
 
-            Console.WriteLine($"Money for food:{percentConverterForFood:f2}% ");
+            Console.WriteLine($"Money for food:{result.Food.Percent:f2}% ");
 
-            Console.WriteLine($"Money for clothes:{percentConverterForClothes:f2}% ");
+            Console.WriteLine($"Money for clothes:{result.Clothes.Percent:f2}% ");
 
-            Console.WriteLine($"Money for fun:{percentConverterForFun:f2}% ");
+            Console.WriteLine($"Money for fun:{result.Fun.Percent:f2}% ");
 
-            Console.WriteLine($"Money for hobby: {percentConverterForHobby:f2}% ");
+            Console.WriteLine($"Money for hobby: {result.Hobby.Percent:f2}% ");
 
-            Console.WriteLine($"Money for your future:{percentConverterForFuture:f2}% ");
+            Console.WriteLine($"Money for your future:{result.Future.Percent:f2}% ");
 
-            Console.WriteLine($"Residue: {residue}лв.");
+            Console.WriteLine($"Residue: {result.Residue}{currency}");
 
             Console.WriteLine($"Result:");
 
-            Console.WriteLine($"Needs: {percentConverterForNeeds:f2}%({(percentConverterForNeeds / 100 * salary):f2}лв.)" +
-                $" Investment:{percentConverterForInvestment:f2}%({(percentConverterForInvestment / 100 * salary):f2}лв.)" +
-                $" Wants:{percentConverterForWant:f2}%({(percentConverterForWant / 100 * salary):f2}лв.)");
+            Console.WriteLine($"Needs: {result.Needs.Percent:f2}%({(result.Needs.Percent / 100 * salary):f2}{currency})" +
+                $" Investment:{result.Investment.Percent:f2}%({(result.Investment.Percent / 100 * salary):f2}{currency})" +
+                $" Wants:{result.Wants.Percent:f2}%({(result.Wants.Percent / 100 * salary):f2}{currency})");
 
             Console.WriteLine("Do you wanna start over y/n");
             string input = Console.ReadLine();
@@ -120,12 +116,6 @@ namespace BudgetTest
                 Console.Clear();
                 StartUp.Main();
             }
-        }
-
-        private static decimal GiveMeProcent(decimal salary, decimal expenditure)
-        {
-            decimal procent = expenditure / salary * 100;
-            return procent;
         }
     }
 }
