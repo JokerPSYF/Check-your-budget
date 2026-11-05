@@ -2,12 +2,10 @@ using System.Globalization;
 
 namespace BudgetProcents.Desktop.ViewModels;
 
-/// <summary>One money input box: what the user typed, and the amount it means.</summary>
-public sealed class AmountField(string label) : ObservableObject
+/// <summary>A money input box: what the user typed, and the amount it means.</summary>
+public class AmountField(string text = "") : ObservableObject
 {
-    private string text = "";
-
-    public string Label { get; } = label;
+    private string text = text;
 
     public string Text
     {
@@ -28,7 +26,7 @@ public sealed class AmountField(string label) : ObservableObject
     public bool HasError => !TryParse(text, out _);
 
     // Accepts "12,50" and "12.50" whatever the Windows number format is. No minus sign, no letters.
-    private static bool TryParse(string text, out decimal amount)
+    private static bool TryParse(string? text, out decimal amount)
     {
         amount = 0;
         if (string.IsNullOrWhiteSpace(text))

@@ -3,19 +3,9 @@ namespace BudgetProcents.Core;
 /// <summary>An amount of money and the percentage of the salary it represents.</summary>
 public readonly record struct Share(decimal Amount, decimal Percent);
 
-/// <summary>Spending per group and how it compares to the 50/40/10 rule.</summary>
-public sealed record BudgetResult
+/// <summary>Total spending, what is left, and how each category compares to the 50/40/10 rule.</summary>
+public sealed record BudgetSummary
 {
-    public required Share Car { get; init; }
-    public required Share Games { get; init; }
-    public required Share Home { get; init; }
-    public required Share Food { get; init; }
-    public required Share Clothes { get; init; }
-    public required Share Fun { get; init; }
-    public required Share Hobby { get; init; }
-    public required Share Future { get; init; }
-    public required Share Health { get; init; }
-
     public required decimal TotalSpent { get; init; }
     public required decimal Residue { get; init; }
 

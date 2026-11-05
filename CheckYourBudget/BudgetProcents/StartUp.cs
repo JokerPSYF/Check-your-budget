@@ -53,26 +53,25 @@ namespace BudgetTest
 
 
             //LOGIC
-            BudgetResult result = BudgetCalculator.Calculate(new BudgetInput
-            {
-                Salary = salary,
-                InternetAndTv = TV,
-                Food = food,
-                GoingOut = goOut,
-                HomeStuff = homeStuf,
-                Clothes = clothes,
-                Gas = gas,
-                Dad = dad,
-                Hobby = hobby,
-                Car = car,
-                Cat = cat,
-                ElectricityAndWater = electricity,
-                Cinema = cinema,
-                Haircut = cutHair,
-                Games = games,
-                Future = future,
-                Health = health,
-            });
+            BudgetSummary result = BudgetCalculator.Summarize(salary,
+            [
+                new("Internet and TV", Category.Needs, TV),
+                new("Food", Category.Needs, food),
+                new("Go out", Category.Wants, goOut),
+                new("Home stuff", Category.Needs, homeStuf),
+                new("Clothes", Category.Needs, clothes),
+                new("Gas", Category.Needs, gas),
+                new("Hobby", Category.Wants, hobby),
+                new("Car", Category.Needs, car),
+                new("Cat", Category.Needs, cat),
+                new("Electricity and water", Category.Needs, electricity),
+                new("Cinema", Category.Wants, cinema),
+                new("Cut hair", Category.Needs, cutHair),
+                new("Games", Category.Wants, games),
+                new("Your future", Category.Investment, future),
+                new("Your health", Category.Needs, health),
+            ]);
+            decimal Percent(decimal amount) => BudgetCalculator.ShareOf(salary, amount).Percent;
             const string currency = BudgetCalculator.Currency;
 
             //OUTPUT
@@ -84,21 +83,21 @@ namespace BudgetTest
                 $"10% ({result.WantsTarget.Amount:f2} {currency}) for wants " +
                 $"(restaurants, entertainment, vacations, luxuary items, electronics)");
 
-            Console.WriteLine($"Money for car:{result.Car.Percent:f2}% ");
+            Console.WriteLine($"Money for car:{Percent(gas + car):f2}% ");
 
-            Console.WriteLine($"Money for games:{result.Games.Percent:f2}% ");
+            Console.WriteLine($"Money for games:{Percent(games):f2}% ");
 
-            Console.WriteLine($"Money for home:{result.Home.Percent:f2}% ");
+            Console.WriteLine($"Money for home:{Percent(TV + homeStuf + dad + cat + electricity):f2}% ");
 
-            Console.WriteLine($"Money for food:{result.Food.Percent:f2}% ");
+            Console.WriteLine($"Money for food:{Percent(food):f2}% ");
 
-            Console.WriteLine($"Money for clothes:{result.Clothes.Percent:f2}% ");
+            Console.WriteLine($"Money for clothes:{Percent(clothes + cutHair):f2}% ");
 
-            Console.WriteLine($"Money for fun:{result.Fun.Percent:f2}% ");
+            Console.WriteLine($"Money for fun:{Percent(goOut + cinema):f2}% ");
 
-            Console.WriteLine($"Money for hobby: {result.Hobby.Percent:f2}% ");
+            Console.WriteLine($"Money for hobby: {Percent(hobby):f2}% ");
 
-            Console.WriteLine($"Money for your future:{result.Future.Percent:f2}% ");
+            Console.WriteLine($"Money for your future:{Percent(future):f2}% ");
 
             Console.WriteLine($"Residue: {result.Residue}{currency}");
 

@@ -4,7 +4,7 @@
         xmlns:vm="clr-namespace:BudgetProcents.Desktop.ViewModels"
         xmlns:core="clr-namespace:BudgetProcents.Core;assembly=BudgetProcents.Core"
         Title="Check your budget"
-        Width="1040" Height="800" MinWidth="760" MinHeight="480"
+        Width="1040" Height="800" MinWidth="800" MinHeight="480"
         WindowStartupLocation="CenterScreen">
 
     <Window.DataContext>
@@ -27,6 +27,10 @@
         <Style x:Key="Small" TargetType="TextBlock" BasedOn="{StaticResource Muted}">
             <Setter Property="FontSize" Value="12" />
         </Style>
+        <Style x:Key="Subsection" TargetType="TextBlock" BasedOn="{StaticResource Small}">
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Margin" Value="0,10,0,2" />
+        </Style>
         <Style x:Key="Big" TargetType="TextBlock">
             <Setter Property="FontSize" Value="22" />
             <Setter Property="FontWeight" Value="SemiBold" />
@@ -34,25 +38,85 @@
 
         <SolidColorBrush x:Key="DangerBrush" Color="#D13438" />
         <SolidColorBrush x:Key="WarningBrush" Color="#C77C02" />
+        <FontFamily x:Key="IconFont">Segoe Fluent Icons, Segoe MDL2 Assets</FontFamily>
 
-        <!-- One input row: label on the left, amount box with the currency on the right. -->
-        <DataTemplate DataType="{x:Type vm:AmountField}">
-            <DockPanel Margin="0,2">
-                <TextBlock DockPanel.Dock="Right" Width="18" Margin="8,0,0,0" Opacity="0.6" VerticalAlignment="Center"
-                           Text="{x:Static core:BudgetCalculator.Currency}" />
-                <TextBox x:Name="Box" DockPanel.Dock="Right" Width="160"
-                         Text="{Binding Text, UpdateSourceTrigger=PropertyChanged}"
-                         TextAlignment="Right" VerticalContentAlignment="Center" />
-                <TextBlock x:Name="Label" Text="{Binding Label}" VerticalAlignment="Center" />
-            </DockPanel>
-            <DataTemplate.Triggers>
-                <!-- Invalid input: red text and label (the theme hides border colors while typing). -->
+        <!-- The € after an amount box. -->
+        <Style x:Key="CurrencyMark" TargetType="TextBlock">
+            <Setter Property="Width" Value="18" />
+            <Setter Property="Margin" Value="8,0,0,0" />
+            <Setter Property="Opacity" Value="0.6" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Text" Value="{x:Static core:BudgetCalculator.Currency}" />
+        </Style>
+
+        <!-- Amount box. Invalid input turns red (the theme hides border colors while typing). -->
+        <Style x:Key="AmountBox" TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+            <Setter Property="Width" Value="130" />
+            <Setter Property="TextAlignment" Value="Right" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Style.Triggers>
                 <DataTrigger Binding="{Binding HasError}" Value="True">
-                    <Setter TargetName="Box" Property="Foreground" Value="{StaticResource DangerBrush}" />
-                    <Setter TargetName="Box" Property="ToolTip" Value="Enter a positive number, for example 12,50" />
-                    <Setter TargetName="Label" Property="Foreground" Value="{StaticResource DangerBrush}" />
+                    <Setter Property="Foreground" Value="{StaticResource DangerBrush}" />
+                    <Setter Property="ToolTip" Value="Enter a positive number, for example 12,50" />
                 </DataTrigger>
-            </DataTemplate.Triggers>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Item name: reads like a label, and shows the text box frame on hover and while editing.
+             The negative margin lines its text up with the labels and headings above it. -->
+        <Style x:Key="NameBox" TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Margin" Value="-11,0,8,0" />
+            <Setter Property="ToolTip" Value="Click to rename" />
+        </Style>
+
+        <!-- Small borderless button with an icon, used to remove a row. -->
+        <Style x:Key="IconButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Width" Value="32" />
+            <Setter Property="Height" Value="32" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Margin" Value="4,0,0,0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="FontFamily" Value="{StaticResource IconFont}" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="Opacity" Value="0.7" />
+            <!-- Keeps Tab moving between the boxes; the button is still reachable with the mouse and screen readers. -->
+            <Setter Property="IsTabStop" Value="False" />
+        </Style>
+
+        <!-- One section of inputs: heading, its items, and a button to add another. -->
+        <DataTemplate DataType="{x:Type vm:CategorySection}">
+            <StackPanel>
+                <TextBlock Style="{StaticResource Section}" Text="{Binding Title}" />
+                <ItemsControl ItemsSource="{Binding Items}" Focusable="False" />
+                <Button Command="{Binding AddCommand}" HorizontalAlignment="Left" Margin="0,6,0,0" Padding="10,4"
+                        AutomationProperties.Name="{Binding AddLabel}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock FontFamily="{StaticResource IconFont}" FontSize="12" Text="&#xE710;"
+                                   VerticalAlignment="Center" Margin="0,0,8,0" />
+                        <TextBlock Text="{Binding AddLabel}" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </DataTemplate>
+
+        <!-- One input row: editable name, amount box with the currency, remove button. -->
+        <DataTemplate DataType="{x:Type vm:ExpenseItem}">
+            <DockPanel Margin="0,2">
+                <Button DockPanel.Dock="Right" Style="{StaticResource IconButton}" Content="&#xE74D;"
+                        Command="{Binding RemoveCommand}" ToolTip="Remove"
+                        AutomationProperties.Name="{Binding DisplayName, StringFormat='Remove {0}'}" />
+                <TextBlock DockPanel.Dock="Right" Style="{StaticResource CurrencyMark}" />
+                <TextBox DockPanel.Dock="Right" Style="{StaticResource AmountBox}"
+                         Text="{Binding Text, UpdateSourceTrigger=PropertyChanged}"
+                         AutomationProperties.Name="{Binding DisplayName, StringFormat='{}{0} amount'}" />
+                <TextBox Style="{StaticResource NameBox}" Loaded="NameBox_Loaded"
+                         Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
+                         AutomationProperties.Name="Item name" />
+            </DockPanel>
         </DataTemplate>
 
         <!-- One line of the 50/40/10 rule. -->
@@ -80,21 +144,26 @@
             </DataTemplate.Triggers>
         </DataTemplate>
 
-        <!-- One spending group: name (and what it includes), amount, percent. -->
-        <DataTemplate DataType="{x:Type vm:GroupRow}">
-            <DockPanel Margin="0,4">
-                <TextBlock DockPanel.Dock="Right" Width="76" TextAlignment="Right" FontWeight="SemiBold" Text="{Binding PercentText}" />
-                <TextBlock DockPanel.Dock="Right" Width="120" TextAlignment="Right" Text="{Binding AmountText}" />
-                <StackPanel>
-                    <TextBlock Text="{Binding Name}" />
-                    <TextBlock x:Name="Details" Style="{StaticResource Small}" Text="{Binding Details}" TextWrapping="Wrap" />
-                </StackPanel>
-            </DockPanel>
+        <!-- "By item": one section's items. Hidden while the section has none. -->
+        <DataTemplate DataType="{x:Type vm:BreakdownSection}">
+            <StackPanel x:Name="Root">
+                <TextBlock Style="{StaticResource Subsection}" Text="{Binding Title}" />
+                <ItemsControl ItemsSource="{Binding Rows}" Focusable="False" />
+            </StackPanel>
             <DataTemplate.Triggers>
-                <DataTrigger Binding="{Binding Details}" Value="{x:Null}">
-                    <Setter TargetName="Details" Property="Visibility" Value="Collapsed" />
+                <DataTrigger Binding="{Binding Rows.Count}" Value="0">
+                    <Setter TargetName="Root" Property="Visibility" Value="Collapsed" />
                 </DataTrigger>
             </DataTemplate.Triggers>
+        </DataTemplate>
+
+        <!-- One item: name, amount, percent of the salary. -->
+        <DataTemplate DataType="{x:Type vm:ItemRow}">
+            <DockPanel Margin="0,3">
+                <TextBlock DockPanel.Dock="Right" Width="76" TextAlignment="Right" FontWeight="SemiBold" Text="{Binding PercentText}" />
+                <TextBlock DockPanel.Dock="Right" Width="120" TextAlignment="Right" Text="{Binding AmountText}" />
+                <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
+            </DockPanel>
         </DataTemplate>
     </Window.Resources>
 
@@ -109,21 +178,22 @@
             <StackPanel Margin="28,24">
                 <TextBlock Style="{StaticResource Title}" Text="Check your budget" />
                 <TextBlock Style="{StaticResource Muted}" TextWrapping="Wrap" Margin="0,4,0,14"
-                           Text="Enter this month's salary and what you spent. The results update as you type." />
+                           Text="Enter this month's salary and what you spent. Click a name to rename it, or add and remove items. Everything is saved as you type." />
 
-                <ContentControl Content="{Binding Salary}" FontWeight="SemiBold" Focusable="False" />
+                <DockPanel DataContext="{Binding Salary}" Margin="0,2">
+                    <!-- Same width as a remove button, so the salary box lines up with the boxes below. -->
+                    <Border DockPanel.Dock="Right" Width="32" Margin="4,0,0,0" />
+                    <TextBlock DockPanel.Dock="Right" Style="{StaticResource CurrencyMark}" />
+                    <TextBox DockPanel.Dock="Right" Style="{StaticResource AmountBox}"
+                             Text="{Binding Text, UpdateSourceTrigger=PropertyChanged}"
+                             AutomationProperties.Name="Monthly salary" />
+                    <TextBlock Text="Monthly salary" FontWeight="SemiBold" VerticalAlignment="Center" />
+                </DockPanel>
 
-                <TextBlock Style="{StaticResource Section}" Text="Needs" />
-                <ItemsControl ItemsSource="{Binding NeedsFields}" Focusable="False" />
+                <ItemsControl ItemsSource="{Binding Sections}" Focusable="False" />
 
-                <TextBlock Style="{StaticResource Section}" Text="Wants" />
-                <ItemsControl ItemsSource="{Binding WantsFields}" Focusable="False" />
-
-                <TextBlock Style="{StaticResource Section}" Text="Investment" />
-                <ItemsControl ItemsSource="{Binding InvestmentFields}" Focusable="False" />
-
-                <Button Content="Clear all" Command="{Binding ClearCommand}"
-                        HorizontalAlignment="Left" Margin="0,20,0,0" Padding="14,6" />
+                <Button Content="Clear amounts" Command="{Binding ClearCommand}"
+                        HorizontalAlignment="Left" Margin="0,24,0,0" Padding="14,6" />
             </StackPanel>
         </ScrollViewer>
 
@@ -159,8 +229,8 @@
                     <TextBlock Style="{StaticResource Section}" Text="Rule 50/40/10" />
                     <ItemsControl ItemsSource="{Binding Rules}" Focusable="False" />
 
-                    <TextBlock Style="{StaticResource Section}" Text="By group" />
-                    <ItemsControl ItemsSource="{Binding Groups}" Focusable="False" />
+                    <TextBlock Style="{StaticResource Section}" Text="By item" />
+                    <ItemsControl ItemsSource="{Binding Breakdown}" Focusable="False" />
                 </StackPanel>
             </ScrollViewer>
         </Border>

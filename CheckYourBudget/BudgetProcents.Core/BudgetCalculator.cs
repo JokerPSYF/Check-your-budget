@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using System.Linq;
+
 namespace BudgetProcents.Core;
 
 public static class BudgetCalculator
@@ -9,46 +12,27 @@ public static class BudgetCalculator
     public const decimal InvestmentTargetPercent = 40m;
     public const decimal WantsTargetPercent = 10m;
 
-    public static BudgetResult Calculate(BudgetInput input)
+    /// <summary>Adds up the expenses per category and compares each total to the 50/40/10 rule.</summary>
+    public static BudgetSummary Summarize(decimal salary, IEnumerable<Expense> expenses)
     {
-        decimal salary = input.Salary;
+        List<Expense> all = [.. expenses];
+        decimal Total(Category category) => all.Where(e => e.Category == category).Sum(e => e.Amount);
 
-        decimal car = input.Gas + input.Car;
-        decimal games = input.Games;
-        decimal home = input.InternetAndTv + input.HomeStuff + input.Dad + input.Cat + input.ElectricityAndWater;
-        decimal food = input.Food;
-        decimal clothes = input.Clothes + input.Haircut;
-        decimal fun = input.GoingOut + input.Cinema;
-        decimal hobby = input.Hobby;
-        decimal future = input.Future;
-        decimal health = input.Health;
-        decimal sum = car + games + home + food + clothes + fun + hobby + future + health;
+        decimal needs = Total(Category.Needs);
+        decimal investment = Total(Category.Investment);
+        decimal wants = Total(Category.Wants);
+        decimal spent = needs + investment + wants;
 
-        decimal needs = car + home + food + clothes + health;
-        decimal investment = future;
-        decimal wants = games + fun + hobby;
-
-        Share ShareOf(decimal amount) => new(amount, Percent(salary, amount));
         Share Target(decimal percent) => new(salary * percent / 100, percent);
 
-        return new BudgetResult
+        return new BudgetSummary
         {
-            Car = ShareOf(car),
-            Games = ShareOf(games),
-            Home = ShareOf(home),
-            Food = ShareOf(food),
-            Clothes = ShareOf(clothes),
-            Fun = ShareOf(fun),
-            Hobby = ShareOf(hobby),
-            Future = ShareOf(future),
-            Health = ShareOf(health),
+            TotalSpent = spent,
+            Residue = salary - spent,
 
-            TotalSpent = sum,
-            Residue = salary - sum,
-
-            Needs = ShareOf(needs),
-            Investment = ShareOf(investment),
-            Wants = ShareOf(wants),
+            Needs = ShareOf(salary, needs),
+            Investment = ShareOf(salary, investment),
+            Wants = ShareOf(salary, wants),
 
             NeedsTarget = Target(NeedsTargetPercent),
             InvestmentTarget = Target(InvestmentTargetPercent),
@@ -56,7 +40,7 @@ public static class BudgetCalculator
         };
     }
 
-    /// <summary>What percentage of the salary the amount is. 0 when there is no salary yet.</summary>
-    private static decimal Percent(decimal salary, decimal amount)
-        => salary == 0 ? 0 : amount / salary * 100;
+    /// <summary>The amount and what percentage of the salary it is. 0% when there is no salary yet.</summary>
+    public static Share ShareOf(decimal salary, decimal amount)
+        => new(amount, salary == 0 ? 0 : amount / salary * 100);
 }
