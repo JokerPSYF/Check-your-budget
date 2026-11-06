@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:CheckYourBudget.App.ViewModels"
+             x:Class="CheckYourBudget.App.Views.RulePage"
+             x:DataType="vm:RuleViewModel"
+            
+             Title="Rule">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16" Spacing="16" MaximumWidthRequest="760">
+            <VerticalStackLayout Spacing="4">
+                <Label Style="{StaticResource PageTitle}" Text="Rule" />
+                <Label Style="{StaticResource Muted}" FontSize="14"
+                       Text="A rule splits your income into parts. The Month screen compares your budget with each part." />
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="10" RadioButtonGroup.GroupName="rules"
+                                 RadioButtonGroup.SelectedValue="{Binding SelectedRule}"
+                                 BindableLayout.ItemsSource="{Binding Options}">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate x:DataType="vm:RuleOption">
+                        <Border Style="{StaticResource Card}" Padding="12,8,16,12">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding SelectCommand, Source={RelativeSource AncestorType={x:Type vm:RuleViewModel}}, x:DataType=vm:RuleViewModel}"
+                                                      CommandParameter="{Binding Name}" />
+                            </Border.GestureRecognizers>
+                            <VerticalStackLayout>
+                                <RadioButton Content="{Binding Title}" Value="{Binding Name}" />
+                                <Label Style="{StaticResource Muted}" FontSize="14" Text="{Binding Description}" Margin="4,0,0,0" />
+                            </VerticalStackLayout>
+                        </Border>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </VerticalStackLayout>
+
+            <Border Style="{StaticResource Card}" IsVisible="{Binding IsCustom}">
+                <VerticalStackLayout Spacing="6">
+                    <Label Style="{StaticResource SectionTitle}" Text="Your percentages" />
+                    <Grid ColumnDefinitions="*,80,Auto" RowDefinitions="Auto,Auto,Auto,Auto" ColumnSpacing="8" RowSpacing="2">
+                        <Label Text="Needs, at most" VerticalOptions="Center" />
+                        <Entry Grid.Column="1" Text="{Binding NeedsText}" Keyboard="Numeric" HorizontalTextAlignment="End"
+                               SemanticProperties.Description="Needs percent" />
+                        <Label Grid.Column="2" Text="%" VerticalOptions="Center" />
+
+                        <Label Grid.Row="1" Text="Investment, at least" VerticalOptions="Center" />
+                        <Entry Grid.Row="1" Grid.Column="1" Text="{Binding InvestmentText}" Keyboard="Numeric" HorizontalTextAlignment="End"
+                               SemanticProperties.Description="Investment percent" />
+                        <Label Grid.Row="1" Grid.Column="2" Text="%" VerticalOptions="Center" />
+
+                        <Label Grid.Row="2" Text="Savings, at least" VerticalOptions="Center" />
+                        <Entry Grid.Row="2" Grid.Column="1" Text="{Binding SavingsText}" Keyboard="Numeric" HorizontalTextAlignment="End"
+                               SemanticProperties.Description="Savings percent" />
+                        <Label Grid.Row="2" Grid.Column="2" Text="%" VerticalOptions="Center" />
+
+                        <Label Grid.Row="3" Text="Wants, at most" VerticalOptions="Center" />
+                        <Entry Grid.Row="3" Grid.Column="1" Text="{Binding WantsText}" Keyboard="Numeric" HorizontalTextAlignment="End"
+                               SemanticProperties.Description="Wants percent" />
+                        <Label Grid.Row="3" Grid.Column="2" Text="%" VerticalOptions="Center" />
+                    </Grid>
+                    <Label Text="{Binding TotalText}" TextColor="{Binding TotalColor}" FontSize="14" />
+                </VerticalStackLayout>
+            </Border>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

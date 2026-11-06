@@ -389,6 +389,8 @@ test-results/
 # Mac bundle stuff
 *.dmg
 *.app
+# ...but not the app project, whose folder ends in ".App" (git ignores case on Windows)
+!CheckYourBudget.App/
 
 # content below from: https://github.com/github/gitignore/blob/master/Global/macOS.gitignore
 # General
@@ -456,3 +458,7 @@ $RECYCLE.BIN/
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+
+# Android signing keys: never commit them
+*.keystore
+*.jks

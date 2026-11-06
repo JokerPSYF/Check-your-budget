@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<?xaml-comp compile="true" ?>
+<!-- Every color the app uses, in a light and a dark version. -->
+<ResourceDictionary xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <Color x:Key="PrimaryLight">#1F7A5C</Color>
+    <Color x:Key="PrimaryDark">#5FCFA4</Color>
+    <Color x:Key="OnPrimaryLight">#FFFFFF</Color>
+    <Color x:Key="OnPrimaryDark">#0B2A20</Color>
+
+    <Color x:Key="PageLight">#F3F5F7</Color>
+    <Color x:Key="PageDark">#111315</Color>
+    <Color x:Key="CardLight">#FFFFFF</Color>
+    <Color x:Key="CardDark">#1C1F22</Color>
+    <Color x:Key="LineLight">#DDE2E7</Color>
+    <Color x:Key="LineDark">#33383D</Color>
+
+    <Color x:Key="TextLight">#1A1E22</Color>
+    <Color x:Key="TextDark">#E9ECEF</Color>
+    <Color x:Key="MutedLight">#5B646E</Color>
+    <Color x:Key="MutedDark">#9BA4AE</Color>
+
+    <!-- One color per category: the chart, its legend and the History bars. -->
+    <Color x:Key="NeedsLight">#3B6FD8</Color>
+    <Color x:Key="NeedsDark">#7FA6F2</Color>
+    <Color x:Key="WantsLight">#D9822B</Color>
+    <Color x:Key="WantsDark">#F0B062</Color>
+    <Color x:Key="InvestmentLight">#2A9468</Color>
+    <Color x:Key="InvestmentDark">#5FCF9E</Color>
+    <Color x:Key="SavingsLight">#8657CC</Color>
+    <Color x:Key="SavingsDark">#B795F0</Color>
+    <Color x:Key="LeftOverLight">#C9CED4</Color>
+    <Color x:Key="LeftOverDark">#4A5057</Color>
+
+    <!-- How a target is doing. -->
+    <Color x:Key="OkLight">#2A9468</Color>
+    <Color x:Key="OkDark">#5FCF9E</Color>
+    <Color x:Key="DangerLight">#C93838</Color>
+    <Color x:Key="DangerDark">#F07A7A</Color>
+    <Color x:Key="WarningLight">#B86A12</Color>
+    <Color x:Key="WarningDark">#F0B062</Color>
+    <Color x:Key="DangerSurfaceLight">#FBE9E9</Color>
+    <Color x:Key="DangerSurfaceDark">#3A2020</Color>
+
+</ResourceDictionary>

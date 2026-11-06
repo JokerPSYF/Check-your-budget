@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:CheckYourBudget.App.ViewModels"
+             x:Class="CheckYourBudget.App.Views.MonthPage"
+             x:DataType="vm:MonthViewModel"
+             Title="Month">
+
+    <ContentPage.Resources>
+        <!-- One input section: heading with its total, its rows, and a button to add another row. -->
+        <DataTemplate x:Key="SectionTemplate" x:DataType="vm:SectionViewModel">
+            <Border Style="{StaticResource Card}" Padding="16,12,8,8">
+                <VerticalStackLayout Spacing="2">
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8" Padding="0,0,8,4">
+                        <Ellipse Fill="{Binding Color}" WidthRequest="10" HeightRequest="10" VerticalOptions="Center" />
+                        <Label Grid.Column="1" Style="{StaticResource SectionTitle}" Text="{Binding Title}" VerticalOptions="Center" />
+                        <Label Grid.Column="2" Style="{StaticResource Strong}" Text="{Binding TotalText}" VerticalOptions="Center" />
+                    </Grid>
+
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding Items}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="vm:ItemViewModel">
+                                <Grid ColumnDefinitions="*,92,Auto,44" ColumnSpacing="4">
+                                    <Entry Text="{Binding Name}" Placeholder="Name" Loaded="NameEntry_Loaded"
+                                           SemanticProperties.Description="Item name" />
+                                    <Entry Grid.Column="1" Text="{Binding Text}" Placeholder="0 €" Keyboard="Numeric"
+                                           HorizontalTextAlignment="End" TextColor="{Binding AmountColor}"
+                                           SemanticProperties.Description="{Binding AmountDescription}" />
+                                    <Label Grid.Column="2" Style="{StaticResource Muted}" Text="{Binding PercentText}"
+                                           IsVisible="{Binding ShowPercent}" WidthRequest="54"
+                                           HorizontalTextAlignment="End" VerticalOptions="Center" />
+                                    <Button Grid.Column="3" Style="{StaticResource IconButton}" Text="×" FontSize="22"
+                                            TextColor="{AppThemeBinding Light={StaticResource MutedLight}, Dark={StaticResource MutedDark}}"
+                                            Command="{Binding RemoveCommand}"
+                                            SemanticProperties.Description="{Binding RemoveDescription}" />
+                                </Grid>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+
+                    <Label Text="Amounts are positive numbers, for example 12,50" IsVisible="{Binding HasError}"
+                           FontSize="13" TextColor="{AppThemeBinding Light={StaticResource DangerLight}, Dark={StaticResource DangerDark}}" />
+                    <Button Style="{StaticResource TextButton}" Text="{Binding AddLabel, StringFormat='+ {0}'}"
+                            SemanticProperties.Description="{Binding AddLabel}"
+                            HorizontalOptions="Start" Command="{Binding AddCommand}" />
+                </VerticalStackLayout>
+            </Border>
+        </DataTemplate>
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="Auto,*">
+
+        <!-- Always in view: which month, and what is left of the income. -->
+        <Border Grid.Row="0" StrokeThickness="0" Padding="8,6"
+                BackgroundColor="{AppThemeBinding Light={StaticResource CardLight}, Dark={StaticResource CardDark}}">
+            <Grid ColumnDefinitions="Auto,*,Auto" MaximumWidthRequest="1100">
+                <Button Style="{StaticResource IconButton}" Text="‹" FontSize="30" Command="{Binding PreviousCommand}"
+                        SemanticProperties.Description="Previous month" />
+                <VerticalStackLayout Grid.Column="1" HorizontalOptions="Center" VerticalOptions="Center">
+                    <Label Style="{StaticResource PageTitle}" Text="{Binding MonthTitle}" HorizontalTextAlignment="Center" />
+                    <Label Style="{StaticResource Strong}" FontSize="14" Text="{Binding HeaderText}"
+                           TextColor="{Binding LeftOverColor}" HorizontalTextAlignment="Center" />
+                </VerticalStackLayout>
+                <Button Grid.Column="2" Style="{StaticResource IconButton}" Text="›" FontSize="30" Command="{Binding NextCommand}"
+                        SemanticProperties.Description="Next month" />
+            </Grid>
+        </Border>
+
+        <ScrollView Grid.Row="1">
+            <Grid x:Name="Columns" Padding="16" ColumnSpacing="16" RowSpacing="16" MaximumWidthRequest="1100"
+                  RowDefinitions="Auto,Auto,Auto">
+
+                <!-- Notices: a problem with the saved data, and whether this month is kept yet. -->
+                <VerticalStackLayout x:Name="Notices" Spacing="12">
+                    <Border Style="{StaticResource ProblemCard}" IsVisible="{Binding HasProblem}">
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="{Binding Problem}" />
+                            <Button Style="{StaticResource TextButton}" Text="OK" HorizontalOptions="End"
+                                    Command="{Binding DismissProblemCommand}" SemanticProperties.Description="Dismiss" />
+                        </VerticalStackLayout>
+                    </Border>
+                    <Border Style="{StaticResource Card}" IsVisible="{Binding IsDraft}" Padding="16,12">
+                        <Label Style="{StaticResource Muted}" FontSize="14" Text="{Binding DraftNote}" />
+                    </Border>
+                    <Button Style="{StaticResource TextButton}" Text="Go to this month" HorizontalOptions="Center"
+                            Command="{Binding ThisMonthCommand}">
+                        <Button.Triggers>
+                            <DataTrigger TargetType="Button" Binding="{Binding IsCurrentMonth}" Value="True">
+                                <Setter Property="IsVisible" Value="False" />
+                            </DataTrigger>
+                        </Button.Triggers>
+                    </Button>
+                </VerticalStackLayout>
+
+                <!-- Results: the totals with a chart, and the rule's targets. -->
+                <VerticalStackLayout x:Name="Results" Grid.Row="1" Spacing="16">
+                    <Border Style="{StaticResource Card}">
+                        <VerticalStackLayout Spacing="12">
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                                <VerticalStackLayout Spacing="8" VerticalOptions="Center">
+                                    <VerticalStackLayout>
+                                        <Label Style="{StaticResource Muted}" Text="Income" />
+                                        <Label Style="{StaticResource BigNumber}" Text="{Binding IncomeText}" />
+                                    </VerticalStackLayout>
+                                    <VerticalStackLayout>
+                                        <Label Style="{StaticResource Muted}" Text="Spent" />
+                                        <Label Style="{StaticResource BigNumber}" Text="{Binding SpentText}" />
+                                    </VerticalStackLayout>
+                                    <VerticalStackLayout>
+                                        <Label Style="{StaticResource Muted}" Text="Left over" />
+                                        <Label Style="{StaticResource BigNumber}" Text="{Binding LeftOverText}" TextColor="{Binding LeftOverColor}" />
+                                    </VerticalStackLayout>
+                                </VerticalStackLayout>
+                                <GraphicsView Grid.Column="1" Drawable="{Binding Chart}" WidthRequest="150" HeightRequest="150"
+                                              VerticalOptions="Center" SemanticProperties.Description="{Binding ChartDescription}" />
+                            </Grid>
+
+                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding Legend}" Spacing="4">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:LegendItem">
+                                        <Grid ColumnDefinitions="Auto,*,Auto,64" ColumnSpacing="8"
+                                              SemanticProperties.Description="{Binding Description}">
+                                            <Ellipse Fill="{Binding Color}" WidthRequest="10" HeightRequest="10" VerticalOptions="Center" />
+                                            <Label Grid.Column="1" Text="{Binding Name}" FontSize="14" />
+                                            <Label Grid.Column="2" Text="{Binding AmountText}" FontSize="14" HorizontalTextAlignment="End" />
+                                            <Label Grid.Column="3" Style="{StaticResource Muted}" Text="{Binding PercentText}" HorizontalTextAlignment="End" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <Border Style="{StaticResource Card}">
+                        <VerticalStackLayout Spacing="14">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <Label Style="{StaticResource SectionTitle}" Text="{Binding RuleTitle}" VerticalOptions="Center" />
+                                <Button Grid.Column="1" Style="{StaticResource TextButton}" Text="Change"
+                                        Command="{Binding ChangeRuleCommand}" SemanticProperties.Description="Change the rule" />
+                            </Grid>
+                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding Targets}" Spacing="16">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:TargetRow">
+                                        <VerticalStackLayout Spacing="4">
+                                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                                <Label Style="{StaticResource Strong}" Text="{Binding Name}" />
+                                                <Label Grid.Column="1" Text="{Binding AmountText}" FontSize="14" />
+                                            </Grid>
+                                            <ProgressBar Progress="{Binding Progress}" ProgressColor="{Binding StatusColor}" />
+                                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                                <Label Style="{StaticResource Muted}" Text="{Binding Description}" />
+                                                <Label Grid.Column="1" FontSize="13" Style="{StaticResource Strong}"
+                                                       Text="{Binding StatusText}" TextColor="{Binding StatusColor}" />
+                                            </Grid>
+                                        </VerticalStackLayout>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
+                        </VerticalStackLayout>
+                    </Border>
+                </VerticalStackLayout>
+
+                <!-- Inputs: every section, then the month's actions. -->
+                <VerticalStackLayout x:Name="Inputs" Grid.Row="2" Spacing="16">
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding Sections}"
+                                         BindableLayout.ItemTemplate="{StaticResource SectionTemplate}" Spacing="16" />
+                    <HorizontalStackLayout Spacing="8" HorizontalOptions="Center">
+                        <Button Style="{StaticResource TextButton}" Text="Clear amounts" Command="{Binding ClearCommand}" />
+                        <Button Style="{StaticResource DangerTextButton}" Text="Delete this month" Command="{Binding DeleteCommand}">
+                            <Button.Triggers>
+                                <DataTrigger TargetType="Button" Binding="{Binding IsDraft}" Value="True">
+                                    <Setter Property="IsVisible" Value="False" />
+                                </DataTrigger>
+                            </Button.Triggers>
+                        </Button>
+                    </HorizontalStackLayout>
+                </VerticalStackLayout>
+            </Grid>
+        </ScrollView>
+    </Grid>
+</ContentPage>

@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="CheckYourBudget.App/CheckYourBudget.App.csproj">
+    <Deploy />
+  </Project>
+  <Project Path="CheckYourBudget.Core.Tests/CheckYourBudget.Core.Tests.csproj" />
+  <Project Path="CheckYourBudget.Core/CheckYourBudget.Core.csproj" />
+</Solution>
